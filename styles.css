@@ -77,6 +77,9 @@ body[data-ready] .stamp { opacity:1; transform:none; filter:none; transition-del
 
 /* ── 左下时序轨 ───────────────────────────────────────── */
 .rail { position:fixed; left:var(--gut); bottom:calc(var(--gut) + 64px); z-index:4; width:min(290px,40vw); }
+.rail,.legend { padding:14px 16px; margin:-14px -16px;
+  background:linear-gradient(to top, color-mix(in srgb,var(--paper) 82%,transparent), color-mix(in srgb,var(--paper) 40%,transparent));
+  backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); }
 .rail__h { margin:0 0 10px; font-size:10px; letter-spacing:.14em; color:var(--ink-3); text-transform:uppercase; }
 #rail { display:flex; flex-direction:column; border-left:1px solid var(--line-2); }
 .rail__i {

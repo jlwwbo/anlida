@@ -9,7 +9,7 @@ export const L = {
   BOARD_Y: 57, BOARD_Z: 80,
   STOW_Z: 87, STATION_Z: 177,
   PUSH_HOME: 30, PUSH_END: 131,
-  ACTIVE: 8,
+  ACTIVE: 11,
 };
 L.TRAY_YC = L.TRAY_Y0 + L.TRAY_H / 2;            // 73.5
 L.ROW_Y = [L.TRAY_YC + 14.25, L.TRAY_YC - 14.25];  // 2×5 板的两行（节距 57/2）
@@ -23,12 +23,12 @@ function mats() {
   M.frame  = std(0xdfe3e5, 0.70, 0.04);                       // 机架
   M.alu    = std(0xb4bcc1, 0.34, 0.86);                       // C 形框（铝）
   M.steel  = std(0xcdd4d9, 0.22, 0.92);                       // 钢件
-  M.dark   = std(0x2a3136, 0.42, 0.30);                       // 电机 / 相机体
+  M.dark   = std(0x3f484e, 0.44, 0.28);                       // 电机 / 相机体
   M.ink    = std(0x14181b, 0.55, 0.05);                       // 定位标记
-  M.tray   = std(0xe4e7e8, 0.82, 0.02);                       // 注塑托盘
-  M.divid  = new THREE.MeshStandardMaterial({ color:0xe9edee, roughness:0.45, metalness:0.02, transparent:true, opacity:0.62 });
-  M.foil   = std(0xa9b1b7, 0.16, 1.0);                        // 铝箔
-  M.pvc    = new THREE.MeshStandardMaterial({ color:0xdde6ea, roughness:0.10, metalness:0.0, transparent:true, opacity:0.34 });
+  M.tray   = std(0xd5dade, 0.88, 0.02);                       // 注塑托盘
+  M.divid  = new THREE.MeshStandardMaterial({ color:0xeef2f3, roughness:0.32, metalness:0.02, transparent:true, opacity:0.2, depthWrite:false });
+  M.foil   = std(0xb6bec4, 0.14, 1.0);                        // 铝箔
+  M.pvc    = new THREE.MeshStandardMaterial({ color:0xcfdde4, roughness:0.08, metalness:0.0, transparent:true, opacity:0.46 });
   M.iron   = std(0x8f989e, 0.40, 1.0);
   M.magnet = std(0xc98a2e, 0.38, 0.65);
   M.rubber = std(0x3c4348, 0.86, 0.02);
@@ -38,7 +38,7 @@ function mats() {
   M.pillC  = std(0xc98a2e, 0.50, 0.10);                       // 软胶囊
   M.lamp   = new THREE.MeshStandardMaterial({ color:0xfff6e6, emissive:0xffd9a0, emissiveIntensity:0.9, roughness:0.4 });
   M.shell  = new THREE.MeshStandardMaterial({ color:0xf7f9fa, roughness:0.3, metalness:0.0, transparent:true, opacity:0.055, side:THREE.DoubleSide, depthWrite:false });
-  M.edge   = new THREE.LineBasicMaterial({ color:0x9aa4ab, transparent:true, opacity:0.75 });
+  M.edge   = new THREE.LineBasicMaterial({ color:0x9aa4ab, transparent:true, opacity:0.26 });
   return M;
 }
 
@@ -78,16 +78,26 @@ export function buildMachine() {
 
   // ── P01 外壳：细线框 + 极淡的面 ───────────────────────────────────────────
   const shellG = grp('P01', new THREE.Vector3(L.W / 2, L.H / 2, L.D / 2), new THREE.Vector3(0, 70, 0));
-  const shellBox = B(L.W, L.H, L.D);
-  put(shellG, 'P01', shellBox, M.shell).castShadow = false;
-  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(shellBox), M.edge);
-  shellG.add(edges);
+  const panel = (x, y, z, px, py, pz) => {
+    const m = put(shellG, 'P01', B(x, y, z), M.white, px, py, pz);
+    m.castShadow = false; return m;
+  };
+  panel(L.W, L.H, 6, 0, 0, -L.D / 2 + 3);            // 后板
+  panel(6, L.H, L.D, -L.W / 2 + 3, 0, 0);            // 左板
+  panel(6, L.H, L.D, L.W / 2 - 3, 0, 0);             // 右板
+  panel(130, 6, L.D, 125, L.H / 2 - 3, 0);           // 右端机顶（出药碟嵌在这里）
+  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(B(L.W, L.H, L.D)), M.edge);
+  shellG.add(edges);                                  // 整机轮廓：前面与上面是切开的
   rig.shell = shellG;
 
   // ── P19 电池与主板 ───────────────────────────────────────────────────────
-  const elecG = grp('P19', new THREE.Vector3(190, 10, 130), new THREE.Vector3(0, -80, 0));
-  put(elecG, 'P19', B(320, 16, 140), M.frame);
-  put(elecG, 'P19', B(90, 6, 60), M.dark, -90, 11, 0);
+  const baseG = grp('P01', new THREE.Vector3(L.W / 2, 3.5, L.D / 2), new THREE.Vector3(0, -30, 0));
+  put(baseG, 'P01', B(L.W, 7, L.D), M.frame);
+
+  const elecG = grp('P19', new THREE.Vector3(190, 13, 130), new THREE.Vector3(0, -80, 0));
+  put(elecG, 'P19', B(316, 13, 136), M.frame);
+  put(elecG, 'P19', B(86, 4, 56), M.dark, -92, 8.5, 0);        // 主板
+  put(elecG, 'P19', B(120, 9, 62), M.white, 74, 7, 0);          // 电池组
 
   // ── P18 钥匙锁芯 ─────────────────────────────────────────────────────────
   const lockG = grp('P18', new THREE.Vector3(352, 150, 248), new THREE.Vector3(0, 0, 80));
@@ -95,10 +105,10 @@ export function buildMachine() {
   lock.rotation.x = Math.PI / 2;
 
   // ── P15 出药碟（机顶右端的浅碟）──────────────────────────────────────────
-  const dishG = grp('P15', new THREE.Vector3(330, 176, 196), new THREE.Vector3(0, 40, 60));
-  const dish = put(dishG, 'P15', new THREE.CylinderGeometry(36, 31, 9, 36), M.white);
-  put(dishG, 'P15', new THREE.CylinderGeometry(30, 30, 5, 36), M.frame, 0, 3, 0);
-
+  const dishG = grp('P15', new THREE.Vector3(336, 176, 212), new THREE.Vector3(0, 40, 60));
+  const dish = put(dishG, 'P15', new THREE.CylinderGeometry(30, 26, 9, 36), M.white);
+  put(dishG, 'P15', new THREE.CylinderGeometry(25, 25, 5, 36), M.frame, 0, 3, 0);
+  
   // ── P02 隔板 ×21 ─────────────────────────────────────────────────────────
   for (let i = 0; i <= L.SLOT_N; i++) {
     const g = grp('P02', new THREE.Vector3(slotX(0) - 8.5 + i * L.PITCH, 74, L.STOW_Z), new THREE.Vector3(0, 0, -70));
@@ -161,7 +171,10 @@ export function buildMachine() {
           p = put(bg, 'P04', CY(v.pr2, v.th, 20), pm, 2.6, yy, zz);
           p.rotation.z = Math.PI / 2;
         }
-        if (i === L.ACTIVE && r === 1 && c === 2) { rig.dome = dome; rig.pill = p; }
+        if (i === L.ACTIVE && r === 1 && c === 2) {
+          rig.dome = dome; rig.pill = p;
+          rig.domeX0 = dome.position.x; rig.pillX0 = p.position.x;
+        }
       }
     }
     if (i === L.ACTIVE) { rig.activeTray = tg; rig.activeBoard = bg; }
@@ -176,8 +189,15 @@ export function buildMachine() {
 
   const beamG = cg('P06', new THREE.Vector3(0, 27, 112), new THREE.Vector3(0, -55, 0));
   put(beamG, 'P06', B(38, 14, 206), M.frame);
-  put(beamG, 'P06', B(14, 76, 26), M.frame, 0, 54, -90);      // 后立柱
+  put(beamG, 'P06', B(12, 74, 20), M.frame, 0, 53, -92);      // 后立柱
   put(beamG, 'P06', B(46, 8, 16), M.dark, 0, 2, 96);          // 皮带轮罩
+
+  // 两根 X 导轨（固定在机架上，不随滑车动）；判据 3.1：它们只承自重
+  [16, 214].forEach(rz => {
+    const g = grp('P06', new THREE.Vector3(L.W / 2, 25, rz), new THREE.Vector3(0, -40, 0));
+    const bar = put(g, 'P06', CY(3, 358, 14), M.frame);
+    bar.rotation.z = Math.PI / 2;
+  });
 
   // P07 薄推杆 + 磁铁
   const pushG = cg('P07', new THREE.Vector3(0, L.TRAY_YC, L.PUSH_HOME), new THREE.Vector3(0, 0, -90));
@@ -188,10 +208,10 @@ export function buildMachine() {
 
   // P08 C 形工位框：60 N 在这里闭合
   const yokeG = cg('P08', new THREE.Vector3(0, 0, L.STATION_Z), new THREE.Vector3(0, 0, 70));
-  put(yokeG, 'P08', B(10, 76, 72), M.alu,  26, 72, 0);
-  put(yokeG, 'P08', B(10, 76, 72), M.alu, -26, 72, 0);
-  put(yokeG, 'P08', B(62, 10, 72), M.alu,   0, 115, 0);
-  put(yokeG, 'P08', B(44, 8, 72), M.alu,    0, 30, 0);
+  put(yokeG, 'P08', B(10, 76, 46), M.alu,  26, 72, 0);
+  put(yokeG, 'P08', B(10, 76, 46), M.alu, -26, 72, 0);
+  put(yokeG, 'P08', B(62, 10, 46), M.alu,   0, 115, 0);
+  put(yokeG, 'P08', B(44, 8, 46), M.alu,    0, 30, 0);
 
   // P16/P17 双侧相机 + 漫射光源（仓口前，拍推出途中的托盘两面）
   rig.lamps = [];
@@ -246,8 +266,8 @@ export function buildMachine() {
   const floor = put(chuteG, 'P13', B(34, 2.4, 38), M.white, -10, 50, 0);
   floor.rotation.z = 0.30;                                        // 斜底，往集料杯倒
   // 落料动画用的那粒药：跟着滑车走，所以挂在 chute 组里
-  const fly = put(chuteG, 'P13', CY(4.6, 3.2, 20), M.pillA, 13, L.ROW_Y[0], 0);
-  fly.rotation.z = Math.PI / 2; fly.visible = false;
+  const fly = put(chuteG, 'P13', new THREE.CapsuleGeometry(4.2, 9, 4, 12), M.pillC, 13, L.ROW_Y[0], 0);
+  fly.scale.set(1, 1, 0.55); fly.visible = false;
   rig.fly = fly; rig.chute = chuteG;
 
   // P14 集料杯
@@ -296,10 +316,10 @@ export function pose(rig, t) {
   const collapse = seg(t, 3.8, 4.65);
   if (rig.dome) {
     rig.dome.scale.x = lerp(1, 0.18, collapse);
-    rig.dome.position.x = lerp(0.5 + 7 / 2, 1.3, collapse);
+    rig.dome.position.x = lerp(rig.domeX0, 1.3, collapse);
   }
   if (rig.pill) {
-    rig.pill.position.x = lerp(2.6, -1.4, collapse);
+    rig.pill.position.x = lerp(rig.pillX0, rig.pillX0 - 4.4, collapse);
     rig.pill.visible = t < 4.68;
   }
 

@@ -20,10 +20,10 @@ const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
 const camera = new THREE.PerspectiveCamera(30, 1, 1, 5000);
-camera.position.set(540, 430, 660);
+camera.position.set(556, 306, 776);
 
 const sun = new THREE.DirectionalLight(0xffffff, 2.0);
-sun.position.set(520, 820, 420);
+sun.position.set(560, 610, 530);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
 const c = sun.shadow.camera;
@@ -34,7 +34,7 @@ const fill = new THREE.DirectionalLight(0xffffff, 0.45);
 fill.position.set(-420, 300, -320);
 scene.add(fill);
 
-const shadowMat = new THREE.ShadowMaterial({ color: 0x0e1417, opacity: 0.1 });
+const shadowMat = new THREE.ShadowMaterial({ color: 0x0e1417, opacity: 0.17 });
 const floor = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), shadowMat);
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
@@ -44,7 +44,7 @@ const { root, reg, rig } = buildMachine();
 scene.add(root);
 
 const controls = new OrbitControls(camera, canvas);
-controls.target.set(190, 80, 120);
+controls.target.set(190, 74, 150);
 controls.enableDamping = true;
 controls.dampingFactor = 0.07;
 controls.minDistance = 280;
@@ -60,7 +60,7 @@ const themeDark = () => {
 };
 function syncTheme() {
   const d = themeDark();
-  shadowMat.opacity = d ? 0.3 : 0.1;
+  shadowMat.opacity = d ? 0.34 : 0.17;
   shadowMat.color.set(d ? 0x000000 : 0x0e1417);
   sun.intensity = d ? 2.4 : 2.0;
   renderer.toneMappingExposure = d ? 0.94 : 1.05;
@@ -98,7 +98,9 @@ function hiMat(m) {
   if (!hiCache.has(m)) {
     const k = m.clone();
     k.emissive = new THREE.Color(0xb8402f);
-    k.emissiveIntensity = 0.34;
+    k.emissiveIntensity = 0.42;
+    if (k.color) k.color.lerp(new THREE.Color(0xc4543f), 0.42);   // 浅色件也要看得出被选中
+    if (k.transparent) k.opacity = Math.min(1, k.opacity * 1.9);
     hiCache.set(m, k);
   }
   return hiCache.get(m);
@@ -234,3 +236,12 @@ legend.innerHTML = groups.map(g => `<div class="lg"><h3 class="mono">${g}</h3>${
 }</div>`).join('');
 legend.addEventListener('pointerover', e => { const b = e.target.closest('.lg__i'); if (b && !pinned) setHot(b.dataset.id); });
 legend.addEventListener('click', e => { const b = e.target.closest('.lg__i'); if (b) { pinned = b.dataset.id; setHot(b.dataset.id); $('#pinned').hidden = false; } });
+
+// 调试钩子（只在本地用；不影响渲染）
+window.__dbg = () => ({
+  carX: +rig.car.position.x.toFixed(1),
+  trayZ: +rig.activeTray.position.z.toFixed(1),
+  pushZ: +rig.push.position.z.toFixed(1),
+  punchX: +rig.punch.position.x.toFixed(1),
+  flyVis: rig.fly.visible, flyP: rig.fly.position.toArray().map(v => +v.toFixed(1)),
+});
