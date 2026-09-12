@@ -25,9 +25,9 @@
   <h1>把药留在<br>原包装里</h1>
   <p class="lede">现有的自动取药器无一例外要求先把药剥出原包装、散装进药仓。这台机器不剥——它按着原厂铝塑泡罩板，一次挤出一粒。</p>
   <dl class="figs">
-    <div><dt class="mono">380<s>×</s>250<s>×</s>180</dt><dd>mm<i></i>一台面包机的占地</dd></div>
-    <div><dt class="mono">20</dt><dd>槽<i></i>10 种板装药 × 2 板备份</dd></div>
-    <div><dt class="mono">4.1</dt><dd>s/粒<i></i>7 板的早间事件约 30 秒</dd></div>
+    <div><dt class="mono">380<s>×</s>250<s>×</s>180</dt><dd>mm<i></i><span>一台面包机的占地</span></dd></div>
+    <div><dt class="mono">20</dt><dd>槽<i></i><span>10 种板装药 × 2 板备份</span></dd></div>
+    <div><dt class="mono">4.1</dt><dd>s/粒<i></i><span>7 板的早间事件约 30 秒</span></dd></div>
   </dl>
 </header>
 
@@ -37,16 +37,19 @@
   <p class="note" id="phaseNote"></p>
 </nav>
 
-<aside class="card" id="card" data-empty="1" aria-live="polite"></aside>
+<div class="sheet" id="sheet">
+  <button class="sheet__grab" id="sheetClose" aria-label="收起"></button>
+  <aside class="card" id="card" data-empty="1" aria-live="polite"></aside>
+  <section class="legend" id="legend" aria-label="零件清单"></section>
+</div>
 <p class="pinned mono" id="pinned" hidden>已钉住 · 点空白处取消</p>
-
-<section class="legend" id="legend" aria-label="零件清单"></section>
 
 <div class="dock">
   <button id="play" class="btn" data-on="1"><em></em><span>暂停</span></button>
-  <label class="sl"><span class="mono">时序</span><input id="scrub" type="range" min="0" max="1000" value="0"></label>
+  <label class="sl sl--scrub"><span class="mono">时序</span><input id="scrub" type="range" min="0" max="1000" value="0"></label>
   <label class="sl"><span class="mono">拆开 <b id="explVal">0%</b></span><input id="expl" type="range" min="0" max="1000" value="0"></label>
   <button id="shell" class="btn btn--ghost"><span>外壳</span></button>
+  <button id="parts" class="btn btn--only-touch"><span>零件</span></button>
 </div>
 
 <p class="stamp mono">ANLD·13 — r2.9<i></i>零件 19<i></i>白模示意，非制造图</p>

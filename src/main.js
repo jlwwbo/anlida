@@ -9,7 +9,8 @@ const canvas = $('#view');
 
 // ── 渲染器 ─────────────────────────────────────────────────────────────────
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const touch = !matchMedia('(hover: hover) and (pointer: fine)').matches;
+renderer.setPixelRatio(Math.min(devicePixelRatio, touch ? 1.75 : 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
 renderer.shadowMap.enabled = true;
@@ -21,11 +22,19 @@ scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
 const camera = new THREE.PerspectiveCamera(30, 1, 1, 5000);
 camera.position.set(556, 306, 776);
+const FOCUS = new THREE.Vector3(190, 80, 138), R = 232;   // 整机包围球（略小于实际，允许边缘出框）
+// 竖屏时水平视野才是约束，按它退相机；否则手机上机器一半在画外
+function fitCamera() {
+  const vf = THREE.MathUtils.degToRad(camera.fov);
+  const hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect);
+  const d = R / Math.sin(Math.min(vf, hf) / 2) * 0.88;
+  camera.position.sub(FOCUS).setLength(d).add(FOCUS);
+}
 
 const sun = new THREE.DirectionalLight(0xffffff, 2.0);
 sun.position.set(560, 610, 530);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.mapSize.set(touch ? 1024 : 2048, touch ? 1024 : 2048);
 const c = sun.shadow.camera;
 c.left = -380; c.right = 380; c.top = 380; c.bottom = -380; c.near = 10; c.far = 2200;
 sun.shadow.bias = -0.0006; sun.shadow.normalBias = 1.2;
@@ -44,14 +53,16 @@ const { root, reg, rig } = buildMachine();
 scene.add(root);
 
 const controls = new OrbitControls(camera, canvas);
-controls.target.set(190, 74, 150);
+controls.target.copy(FOCUS);
 controls.enableDamping = true;
 controls.dampingFactor = 0.07;
 controls.minDistance = 280;
 controls.maxDistance = 1800;
+controls.enablePan = !touch;      // 手机上抽屉要挪画面，平移会跟它打架
 controls.minPolarAngle = 0.22;
 controls.maxPolarAngle = 1.42;
 controls.update();
+resize();
 
 // ── 主题：画布不画底，底色交给 CSS；只把阴影浓度跟着主题调 ─────────────────
 const themeDark = () => {
@@ -74,6 +85,8 @@ function resize() {
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
+  fitCamera();
+  controls && controls.update();
 }
 addEventListener('resize', resize);
 resize();
@@ -99,7 +112,7 @@ function hiMat(m) {
     const k = m.clone();
     k.emissive = new THREE.Color(0xb8402f);
     k.emissiveIntensity = 0.42;
-    if (k.color) k.color.lerp(new THREE.Color(0xc4543f), 0.42);   // 浅色件也要看得出被选中
+    if (k.color) k.color.lerp(new THREE.Color(0xc4543f), 0.3);    // 浅色件也要看得出被选中
     if (k.transparent) k.opacity = Math.min(1, k.opacity * 1.9);
     hiCache.set(m, k);
   }
@@ -120,6 +133,12 @@ function setHot(id) {
 // ── 卡片与引线 ─────────────────────────────────────────────────────────────
 const byId = Object.fromEntries(PARTS.map(p => [p.id, p]));
 const card = $('#card'), leader = $('#leader line'), marker = $('#marker');
+const openSheet = k => { document.body.dataset.sheet = k; };
+// 抽屉升起来会盖住半台机器 —— 把注视点压低，机器就浮到抽屉上方
+const aimY = () => FOCUS.y - (touch && document.body.dataset.sheet ? 58 : 0);
+const closeSheet = () => { delete document.body.dataset.sheet; pinned = null; $('#pinned').hidden = true; setHot(null); };
+$('#sheetClose').onclick = closeSheet;
+$('#parts').onclick = () => { pinned = null; setHot(null); openSheet('list'); };
 function paintCard(id) {
   if (!id) {
     card.dataset.empty = '1'; marker.hidden = true; leader.style.opacity = 0;
@@ -136,7 +155,7 @@ function paintCard(id) {
     return;
   }
   const p = byId[id];
-  card.dataset.empty = '';
+  delete card.dataset.empty;
   card.innerHTML = `
     <div class="card__top"><span class="mono tag">${p.id}</span><span class="mono grp">${p.grp}</span></div>
     <h2>${p.nm}</h2>
@@ -163,16 +182,31 @@ const pickable = [];
 for (const p of reg.values()) p.meshes.forEach(m => pickable.push(m));
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
 let pinned = null;
-canvas.addEventListener('pointermove', e => {
-  ndc.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+function hitAt(x, y) {
+  ndc.set((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1);
   ray.setFromCamera(ndc, camera);
-  const hit = ray.intersectObjects(pickable, false).find(h => h.object.visible);
-  const id = hit ? hit.object.userData.part : null;
-  canvas.style.cursor = id ? 'crosshair' : 'grab';
-  if (!pinned) setHot(id);
-});
-canvas.addEventListener('pointerleave', () => { if (!pinned) setHot(null); });
-canvas.addEventListener('click', () => { pinned = pinned ? null : hot; $('#pinned').hidden = !pinned; });
+  const h = ray.intersectObjects(pickable, false).find(o => o.object.visible);
+  return h ? h.object.userData.part : null;
+}
+if (!touch) {
+  canvas.addEventListener('pointermove', e => {
+    const id = hitAt(e.clientX, e.clientY);
+    canvas.style.cursor = id ? 'crosshair' : 'grab';
+    if (!pinned) setHot(id);
+  });
+  canvas.addEventListener('pointerleave', () => { if (!pinned) setHot(null); });
+  canvas.addEventListener('click', () => { pinned = pinned ? null : hot; $('#pinned').hidden = !pinned; });
+} else {
+  // 触屏上没有悬停：位移小于 8 px 算点选，否则交给 OrbitControls 转视角
+  let sx = 0, sy = 0, drag = 0;
+  canvas.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; drag = 0; });
+  canvas.addEventListener('pointermove', e => { drag = Math.max(drag, Math.hypot(e.clientX - sx, e.clientY - sy)); });
+  canvas.addEventListener('pointerup', e => {
+    if (drag > 8) return;
+    const id = hitAt(e.clientX, e.clientY);
+    if (id) { pinned = id; setHot(id); openSheet('part'); } else closeSheet();
+  });
+}
 
 // ── 时序 ───────────────────────────────────────────────────────────────────
 let t = 0, playing = true;
@@ -217,6 +251,7 @@ function frame() {
   const io = 1 - intro;                       // 入场：零件从爆炸位归拢
   explode = Math.max(+explIn.value / 1000, io * io * 0.9);
   applyExplode();
+  controls.target.y += (aimY() - controls.target.y) * Math.min(1, dt * 7);
   controls.update();
   syncPhase();
   placeLeader();
@@ -235,7 +270,7 @@ legend.innerHTML = groups.map(g => `<div class="lg"><h3 class="mono">${g}</h3>${
     `<button class="lg__i" data-id="${p.id}"><i class="dot dot--${p.st}"></i>${p.nm}</button>`).join('')
 }</div>`).join('');
 legend.addEventListener('pointerover', e => { const b = e.target.closest('.lg__i'); if (b && !pinned) setHot(b.dataset.id); });
-legend.addEventListener('click', e => { const b = e.target.closest('.lg__i'); if (b) { pinned = b.dataset.id; setHot(b.dataset.id); $('#pinned').hidden = false; } });
+legend.addEventListener('click', e => { const b = e.target.closest('.lg__i'); if (b) { pinned = b.dataset.id; setHot(b.dataset.id); $('#pinned').hidden = !touch; openSheet('part'); } });
 
 // 调试钩子（只在本地用；不影响渲染）
 window.__dbg = () => ({

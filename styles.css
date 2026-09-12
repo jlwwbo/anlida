@@ -139,7 +139,7 @@ body[data-ready] .stamp { opacity:1; transform:none; filter:none; transition-del
   background:color-mix(in srgb, var(--sheet) 88%, transparent);
   border:1px solid var(--line-2); box-shadow:var(--sh); backdrop-filter:blur(10px);
 }
-.btn { display:inline-flex; align-items:center; gap:7px; padding:6px 12px; border:1px solid var(--line);
+.btn { display:inline-flex; align-items:center; gap:7px; padding:6px 12px; border:1px solid var(--line); white-space:nowrap;
   background:none; color:var(--ink-2); font:inherit; font-size:11.5px; cursor:pointer; transition:.2s ease; }
 .btn:hover { color:var(--ink); border-color:var(--ink-3); }
 .btn em { width:7px; height:8px; border-left:2px solid currentColor; border-right:2px solid currentColor; }
@@ -167,22 +167,77 @@ input[type=range]:focus-visible { outline:1px solid var(--accent); outline-offse
 
 @media (prefers-reduced-motion:reduce) { * { transition-duration:.01ms !important; animation-duration:.01ms !important; } }
 
+/* ── 抽屉：桌面端不存在（卡片与图例各自固定），触屏端是底部抽屉 ─────── */
+.sheet { display:contents; }
+.sheet__grab { display:none; }
+.btn--only-touch { display:none; }
+@media (hover:none) { .btn--only-touch { display:inline-flex; } }
+
 /* ── 窄屏 ─────────────────────────────────────────────── */
-@media (max-width:1100px) { .legend { display:none; } .rail { bottom:calc(var(--gut) + 60px); } }
+@media (max-width:1100px) { .legend { display:none; } }
+
 @media (max-width:900px) {
-  .mast { max-width:none; right:var(--gut); }
+  /* 刊头压到两行，让出画面 */
+  .mast { max-width:none; right:var(--gut); pointer-events:none; }
+  .mast h1 { font-size:clamp(26px,7.6vw,34px); }
   .lede { display:none; }
-  .figs { gap:18px; margin-top:16px; padding-top:12px; }
-  .card { left:var(--gut); right:var(--gut); top:auto; bottom:calc(var(--gut) + 110px); width:auto; max-height:36vh; }
-  .card[data-empty] { display:none; }
-  .pinned { display:none; }
-  .rail { left:var(--gut); right:var(--gut); width:auto; bottom:calc(var(--gut) + 58px); }
-  #rail { flex-direction:row; border-left:0; border-top:1px solid var(--line-2); overflow-x:auto; }
-  .rail__i { padding:8px 14px 0 0; grid-template-columns:auto; gap:2px; }
-  .rail__i::before { left:0; right:auto; top:-1px; bottom:auto; width:100%; height:2px; transform:scaleX(0); transform-origin:left; }
+  .eyebrow { margin-bottom:10px; }
+  .figs { gap:6px 16px; margin-top:12px; padding-top:10px; flex-wrap:wrap; }
+  .figs div { display:flex; align-items:baseline; gap:5px; }
+  .figs dt { font-size:13px; }
+  .figs dd { margin:0; }
+  .figs dd i,.figs dd span { display:none; }
+
+  /* 时序轨横滑，贴在操作台上方 */
+  .rail { left:0; right:0; width:auto; bottom:calc(var(--gut) + 52px); padding:10px var(--gut) 8px; margin:0; }
+  .rail__h,.rail__r,.note { display:none; }
+  #rail { flex-direction:row; border-left:0; border-top:1px solid var(--line-2); overflow-x:auto;
+    scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  #rail::-webkit-scrollbar { display:none; }
+  .rail__i { flex:none; padding:8px 15px 0 0; grid-template-columns:auto; gap:2px; font-size:12px; }
+  .rail__i::before { left:0; right:auto; top:-1px; bottom:auto; width:calc(100% - 16px); height:2px;
+    transform:scaleX(0); transform-origin:left; }
   .rail__i[data-on]::before { transform:scaleX(1); }
-  .rail__r { display:none; }
-  .note { display:none; }
-  .dock { left:var(--gut); right:var(--gut); transform:none; justify-content:space-between; gap:10px; padding:8px 10px; }
+
+  /* 操作台一行到底 */
+  .dock { left:0; right:0; bottom:0; transform:none; gap:10px; padding:8px var(--gut) calc(8px + env(safe-area-inset-bottom));
+    border-left:0; border-right:0; border-bottom:0; justify-content:space-between; }
+  .sl--scrub { display:none; }          /* 时序改由上面那条轨承担 */
+  .sl { gap:7px; }
+  .sl .mono { font-size:9px; }
+  input[type=range] { width:auto; flex:1; min-width:54px; }
+  .btn { padding:7px 10px; }
+
+  /* 卡片与图例合成一个底部抽屉 */
+  .sheet {
+    display:block; position:fixed; left:0; right:0; bottom:calc(46px + env(safe-area-inset-bottom)); z-index:9;
+    max-height:66svh; overflow:hidden; background:var(--sheet);
+    border-top:1px solid var(--line-2); border-radius:14px 14px 0 0;
+    box-shadow:0 -20px 48px -28px rgba(18,26,31,.5);
+    transform:translateY(102%);
+    transition:transform .42s cubic-bezier(.16,1,.3,1), visibility 0s linear .42s;
+    display:flex; flex-direction:column;
+  }
+  body:not([data-sheet]) .sheet { visibility:hidden; }
+  body[data-sheet] .sheet { transform:none; transition-delay:0s; }
+  .sheet__grab { display:block; flex:none; width:100%; padding:12px 0 6px; border:0; background:none; cursor:pointer; }
+  .sheet__grab::before { content:""; display:block; width:38px; height:3px; margin:0 auto; border-radius:2px; background:var(--line); }
+
+  .card { position:static; width:auto; max-height:none; padding:6px 20px 22px; border:0; box-shadow:none;
+    overflow:auto; opacity:1; transform:none; filter:none; }
+  .card[data-empty] { display:none; }
+  body[data-sheet=list] .card { display:none; }
+  .pinned { display:none; }
+
+  .legend { display:block; position:static; padding:0 20px 24px; margin:0; overflow:auto;
+    background:none; backdrop-filter:none; opacity:1; transform:none; filter:none; }
+  body:not([data-sheet=list]) .legend { display:none; }
+  .lg { margin-bottom:14px; }
+  .lg__i { padding:7px 0; font-size:13.5px; }
+
   .stamp { display:none; }
+  .frame { inset:10px; }
 }
+
+/* 触屏：引线与标记没有意义（手指本来就在那儿），关掉 */
+@media (hover:none) { #leader,#marker { display:none; } }
