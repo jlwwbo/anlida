@@ -4,7 +4,7 @@ import { buildMachine, pose, TOTAL } from './machine.js';
 import { PHASES } from './parts.js';
 import {
   hero, problem, painChapters, manifesto,
-  failureModes, forceScale, forceMarks, interfaces, boundaries, closing,
+  failureModes, forceScale, forceMarks, interfaces, boundaries, closing, papers,
 } from './landing-content.js';
 
 const $ = s => document.querySelector(s);
@@ -46,6 +46,13 @@ $('.ui__cards').innerHTML = interfaces.map(c => `
   </article>`).join('');
 
 $('.bounds__list').innerHTML = boundaries.map(b => `<li data-r>${b}</li>`).join('');
+
+$('#papers').innerHTML = papers.map(p => `
+  <li data-r><a href="${p.file}" target="_blank" rel="noopener">
+    <span class="papers__n">${p.nm}<i class="arw"></i></span>
+    <span class="papers__m mono">${p.meta}</span>
+    <span class="papers__d">${p.d}</span>
+  </a></li>`).join('');
 
 $('.end h2').innerHTML = closing.title.map(l => `<span>${l}</span>`).join('');
 $('.end__body').textContent = closing.body;

@@ -41,6 +41,7 @@ ESA Pages 会把 `/structure.html` 重定向到 `/structure/`，相对路径在�
 |---|---|
 | **`index.html`** | **Landing**。问题（平均 9.1 种药的长尾）→ 三章痛点（提醒被 5 万人的 RCT 否掉 / 分拣每改方一次就要重来 / 剥出原包装效期就不算数）→ 宣言 → **四种竞争失效模式**（可点，画在同一根 0–70 N 的轴上）→ 六个动作 → 患者侧与家属侧 → 明确不做 |
 | **`structure.html`** | **交互结构图**。19 个零件的白模：选一个用药画像装进去，看它占几个槽、几天换一次板，再看一次取药的六段时序 |
+| **`docs/`** | 两份 PDF，从 landing 收尾处点开：**技术白皮书**（89 页，v2.1）与**路演 Slides**（13 页）。文件名用英文——中文路径在 CDN 与下载器上都容易出问题 |
 
 版面骨架仿《常宁居》（`~/Documents/gks`）：刊头 → 全幅问题章节 → 暗带宣言 → 数据 → 步骤 → 收尾 CTA。
 
@@ -77,6 +78,8 @@ src/landing-content.js  landing 的全部文案与数据 —— 改说法只动�
 src/landing.js          文案注入、滚动进场、失效模式图、hero 的 3D
 src/profiles.js         九个用药画像 + 六种板型 + 装载方案与换板周期的计算
 src/parts.js            19 个零件 + 六段时序
+docs/                   技术白皮书与路演 Slides 的 PDF（英文文件名）
+esa.jsonc               阿里云 ESA Pages 构建配置
 src/machine.js          几何装配（单位 mm，直接用文档里的尺寸）+ pose(t) + poseLoad(t)
 src/main.js             结构图页：渲染、拾取高亮、爆炸、时序、画像、抽屉
 serve.mjs               本地预览用的零依赖静态服务（+ serve.test.mjs）

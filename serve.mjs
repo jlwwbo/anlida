@@ -14,6 +14,7 @@ const MIME = {
   '.js': 'text/javascript; charset=utf-8',
   '.mjs': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.pdf': 'application/pdf',        // 不给 pdf 正确的 MIME，浏览器会下载而不是打开
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',

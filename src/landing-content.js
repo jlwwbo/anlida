@@ -92,6 +92,14 @@ export const boundaries = [
   '不自动下单买药', '不采集生理参数', '不碾药、不分割',
 ];
 
+// 两份 PDF。文件名用英文 —— 中文路径在 CDN 与下载器上都容易出问题
+export const papers = [
+  { nm: '技术白皮书', file: '/docs/anlida-whitepaper.pdf', meta: '89 页 · 5.1 MB · v2.1',
+    d: '问题、四种失效模式、整机与外部设计、交互、创新点，附十个附录（板型分类、力学模型、九个画像、市场与政策、来源）。' },
+  { nm: '路演 Slides', file: '/docs/anlida-slides.pdf', meta: '13 页 · 1.3 MB',
+    d: '复客松现场用的那一版。' },
+];
+
 export const closing = {
   title: ['把一些基本的事情，', '重新做一遍。'],
   body: '市场在 ¥150 与 ¥300 之间几乎没有产品：¥150 以下只要一块 PCB，不碰药；¥300 以上要电机、传动和结构件模具，碰药。没有「碰一点点药」这个中间态——这是物理决定的，不是市场决定的。',
