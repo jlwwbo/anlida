@@ -92,13 +92,15 @@ const io = new IntersectionObserver(es => es.forEach(e => {
 document.querySelectorAll('[data-r]').forEach(n => io.observe(n));
 
 // ── Hero 的 3D：复用结构图那台机器，慢转，滚出视口就停 ─────────────────────
+// Hero 是装饰性的，按装饰性的预算来：
+//   ① 像素比封到 1.25（原来 1.75 在 retina 上是 2800×1397 ≈ 390 万像素）
+//   ② 不做实时阴影 —— 每帧省掉一整遍阴影渲染，改用一张假的接触阴影贴图
+//   ③ 30 fps 封顶；滚动时完全停画，滚出视口或切到后台也停
 const canvas = $('#heroView');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.25));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
@@ -108,22 +110,43 @@ const FOCUS = new THREE.Vector3(190, 84, 130), R = 246;
 const camera = new THREE.PerspectiveCamera(28, 1, 1, 5000);
 const sun = new THREE.DirectionalLight(0xffffff, 2.0);
 sun.position.set(560, 610, 530);
-sun.castShadow = true;
-sun.shadow.mapSize.set(1024, 1024);
-Object.assign(sun.shadow.camera, { left: -380, right: 380, top: 380, bottom: -380, near: 10, far: 2200 });
-sun.shadow.bias = -0.0006; sun.shadow.normalBias = 1.2;
 scene.add(sun);
 const fill = new THREE.DirectionalLight(0xffffff, 0.45);
 fill.position.set(-420, 300, -320);
 scene.add(fill);
 
-const shadowMat = new THREE.ShadowMaterial({ color: 0x0e1417, opacity: 0.15 });
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), shadowMat);
-floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true;
-scene.add(floor);
+// 假的接触阴影：一张径向渐变贴图，成本是一个 quad
+function blobTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const rg = g.createRadialGradient(64, 64, 4, 64, 64, 62);
+  rg.addColorStop(0, 'rgba(14,20,23,.42)');
+  rg.addColorStop(0.55, 'rgba(14,20,23,.16)');
+  rg.addColorStop(1, 'rgba(14,20,23,0)');
+  g.fillStyle = rg; g.fillRect(0, 0, 128, 128);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const blobMat = new THREE.MeshBasicMaterial({ map: blobTexture(), transparent: true, depthWrite: false });
+const blob = new THREE.Mesh(new THREE.PlaneGeometry(640, 440), blobMat);
+blob.rotation.x = -Math.PI / 2;
+blob.position.set(196, 0.6, 140);
+scene.add(blob);
 
-const { root, rig } = buildMachine();
+const { root, rig } = buildMachine({ lite: true });
 scene.add(root);
+// 仓里放六块板：够看出「不同板型插在同一排槽里」，又不至于把 draw call 顶上去
+// 放在左半边：右半边被侧板和取药龛挡住，从这个机位看不见
+rig.setLoadout([
+  { i: 1, pack: 'oblong10', eaten: 3 },
+  { i: 3, pack: 'cap7', eaten: 2 },
+  { i: 5, pack: 'tab10', eaten: 0 },
+  { i: 7, pack: 'alu7', eaten: 4 },
+  { i: 9, pack: 'tab14', eaten: 6 },
+  { i: 11, pack: 'small12', eaten: 1 },
+]);
 
 function fit() {
   const r = canvas.getBoundingClientRect();
@@ -134,7 +157,7 @@ function fit() {
   const hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect);
   dist = R / Math.sin(Math.min(vf, hf) / 2) * 0.92;
 }
-let dist = 900, az = 0.55, spin = 0, t = 4.2;   // 开画就停在托盘推出、药落下的那一拍
+let dist = 900, az = 0.34, spin = 0, t = 4.2;   // 开画就停在托盘推出、药落下的那一拍
 addEventListener('resize', fit);
 fit();
 
@@ -142,22 +165,31 @@ const dark = () => {
   const d = document.documentElement.dataset.theme;
   return d === 'dark' || (!d && matchMedia('(prefers-color-scheme: dark)').matches);
 };
-const syncTheme = () => { shadowMat.opacity = dark() ? 0.3 : 0.15; renderer.toneMappingExposure = dark() ? 0.94 : 1.05; };
+const syncTheme = () => { blobMat.opacity = dark() ? 0.72 : 1; renderer.toneMappingExposure = dark() ? 0.94 : 1.05; };
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTheme);
 syncTheme();
 
-let live = true;
+let live = true, scrolledAt = -1e9, acc = 0;
 new IntersectionObserver(es => { live = es[0].isIntersecting; if (live) clock.getDelta(); })
   .observe($('.hero'));
+addEventListener('scroll', () => { scrolledAt = performance.now(); }, { passive: true });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) clock.getDelta(); });
 
+const moving = [rig.activeTray, rig.push, rig.ring, rig.punch].filter(Boolean);
 const clock = new THREE.Clock();
 const slow = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const STEP = 1 / 30;
 function frame() {
   requestAnimationFrame(frame);
-  if (!live) return;
-  const dt = Math.min(clock.getDelta(), 0.05);
-  if (!slow) { spin += dt; az = 0.55 + Math.sin(spin * 0.16) * 0.34; t = (t + dt * 0.62) % TOTAL; }
+  // 滚动的那几百毫秒里一帧都不画 —— 卡顿是主线程在跟滚动抢时间
+  if (!live || document.hidden || performance.now() - scrolledAt < 140) { clock.getDelta(); return; }
+  acc += clock.getDelta();
+  if (acc < STEP) return;
+  const dt = Math.min(acc, 0.1); acc = 0;
+  if (!slow) { spin += dt; az = 0.34 + Math.sin(spin * 0.16) * 0.30; t = (t + dt * 0.62) % TOTAL; }
   pose(rig, t);
+  // pose() 只写 userData.base（结构图那边靠爆炸视图统一落到 position），这里自己落一下
+  for (const g of moving) g.position.copy(g.userData.base);
   camera.position.set(
     FOCUS.x + Math.sin(az) * Math.cos(0.42) * dist,
     FOCUS.y + Math.sin(0.42) * dist,
@@ -167,3 +199,4 @@ function frame() {
   renderer.render(scene, camera);
 }
 frame();
+

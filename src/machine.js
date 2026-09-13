@@ -63,7 +63,8 @@ function slab(w, h, d, r) {
   return g;
 }
 
-export function buildMachine() {
+export function buildMachine(opts = {}) {
+  const lite = !!opts.lite;      // landing 的 hero 用精简档：装饰性的，不需要全部零件
   mats();
   const root = new THREE.Group();
   const reg = new Map();
@@ -141,13 +142,13 @@ export function buildMachine() {
   put(lockG, 'P18', CY(7, 10, 18), M.trim).rotation.x = Math.PI / 2;
 
   // ── P02 隔板 ×21 ─────────────────────────────────────────────────────────
-  for (let i = 0; i <= L.SLOT_N; i++) {
+  for (let i = 0; i <= L.SLOT_N && !lite; i++) {
     const g = grp('P02', new THREE.Vector3(slotX(0) - 8.5 + i * L.PITCH, 74, L.STOW_Z), new THREE.Vector3(0, 0, -70));
     put(g, 'P02', B(1, 72, L.MAG_DEPTH), M.divid).castShadow = false;
   }
 
   // ── P05 弹片卡扣 ×20 ─────────────────────────────────────────────────────
-  for (let i = 0; i < L.SLOT_N; i++) {
+  for (let i = 0; i < L.SLOT_N && !lite; i++) {
     const g = grp('P05', new THREE.Vector3(slotX(i) + 6.5, 42, L.MAG_Z0 + 6), new THREE.Vector3(0, -40, -40));
     put(g, 'P05', B(2.4, 5, 11), M.steel);
   }
@@ -301,9 +302,11 @@ export function buildMachine() {
     if (k === 0) { rig.ring = ringG; rig.punch = punG; }
   });
 
-  const ndlG = cg('P11', new THREE.Vector3(-32, L.ROW_Y[1], L.STATION_Z), new THREE.Vector3(-86, -18, 0));
-  put(ndlG, 'P11', CY(0.9, 26, 10), M.magnet, -4, 0, 0).rotation.z = Math.PI / 2;
-  put(ndlG, 'P11', CY(4.8, 4, 16), M.steel, 4, 0, 0).rotation.z = Math.PI / 2;
+  if (!lite) {
+    const ndlG = cg('P11', new THREE.Vector3(-32, L.ROW_Y[1], L.STATION_Z), new THREE.Vector3(-86, -18, 0));
+    put(ndlG, 'P11', CY(0.9, 26, 10), M.magnet, -4, 0, 0).rotation.z = Math.PI / 2;
+    put(ndlG, 'P11', CY(4.8, 4, 16), M.steel, 4, 0, 0).rotation.z = Math.PI / 2;
+  }
 
   const chuteG = cg('P13', new THREE.Vector3(-24, 0, L.STATION_Z), new THREE.Vector3(-86, -26, 0));
   put(chuteG, 'P13', B(2.6, 40, 42), M.rubber, 0, 74, 0);
@@ -320,7 +323,7 @@ export function buildMachine() {
   put(cupG, 'P14', B(26, 22, 2), M.white, 0, 1, -16);
   rig.cup = cupG;
 
-  ['P04', 'P02'].forEach(id => reg.get(id).meshes.forEach(m => { m.castShadow = false; }));
+  ['P04', 'P02'].forEach(id => reg.has(id) && reg.get(id).meshes.forEach(m => { m.castShadow = false; }));
   return { root, reg, rig };
 }
 

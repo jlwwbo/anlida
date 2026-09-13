@@ -267,6 +267,7 @@ requestAnimationFrame(() => document.body.dataset.ready = '1');
 const clock = new THREE.Clock();
 function frame() {
   requestAnimationFrame(frame);
+  if (document.hidden) { clock.getDelta(); return; }   // 切到后台不画
   const dt = Math.min(clock.getDelta(), 0.05);
   if (intro < 1) intro = Math.min(1, intro + dt / 1.5);
 
