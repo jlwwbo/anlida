@@ -19,8 +19,21 @@ npm test           # serve.mjs 的路径越界自检
 ```
 
 **没有后端。** 整站是两个 HTML + 六个 ES module + vendored 的 three，
-扔进任何静态托管（Vercel / GitHub Pages / 一个 nginx 目录）就能跑。
+扔进任何静态托管（阿里云 ESA Pages / Vercel / GitHub Pages / 一个 nginx 目录）就能跑。
 `serve.mjs` 只为本地预览存在——ES module + importmap 在 `file://` 下会被 CORS 拦，必须走 HTTP。
+
+### 部署
+
+`esa.jsonc` 是阿里云 ESA Pages 的构建配置：无依赖、无构建步骤、仓库根目录即静态资源目录。
+
+```jsonc
+{ "name": "anlida", "installCommand": "", "buildCommand": "", "assets": { "directory": "./" } }
+```
+
+⚠️ **页面里的资源路径一律用根绝对路径**（`/css/…`、`/src/…`、`/vendor/…`），不用 `./`。
+ESA Pages 会把 `/structure.html` 重定向到 `/structure/`，相对路径在那之后会解析到
+`/structure/css/…` 而全部 404。JS 模块之间的 `./machine.js` 不受影响——那是相对模块自身
+的 URL 解析的，不是相对文档。
 
 ## 两个页面
 
