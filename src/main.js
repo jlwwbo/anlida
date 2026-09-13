@@ -29,7 +29,7 @@ const FOCUS = new THREE.Vector3(190, 84, 138), R = 244;
 function fitCamera() {
   const vf = THREE.MathUtils.degToRad(camera.fov);
   const hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect);
-  camera.position.sub(FOCUS).setLength(R / Math.sin(Math.min(vf, hf) / 2) * 0.9).add(FOCUS);
+  camera.position.sub(FOCUS).setLength(R / Math.sin(Math.min(vf, hf) / 2) * (touch ? 0.84 : 0.9)).add(FOCUS);
 }
 
 const sun = new THREE.DirectionalLight(0xffffff, 2.0);
@@ -165,7 +165,7 @@ if (!touch) {
     if (drag > 8) return;
     const id = hitAt(e.clientX, e.clientY);
     if (id) { pinned = id; setHot(id); document.body.dataset.card = '1'; }
-    else { pinned = null; setHot(null); delete document.body.dataset.card; }
+    else { pinned = null; setHot(null); delete document.body.dataset.card; delete document.body.dataset.who; }
   });
 }
 
@@ -206,6 +206,7 @@ function pickProfile(i, replay) {
     ${p.others.length ? `<details class="who__list who__list--out"><summary class="mono">设备管不了的 ${p.others.length} 种</summary>
       <ul>${p.others.map(o => `<li><b>${o.nm}</b><i>${o.why}</i></li>`).join('')}</ul></details>` : ''}
     <p class="who__note">${p.note}</p>`;
+  if (touch) { document.body.dataset.who = '1'; delete document.body.dataset.card; }
   if (replay) startLoad();
 }
 
@@ -289,5 +290,11 @@ function applyExplodeWith(v) { const p = explode; explode = v; applyExplode(); e
 paintCard(null);
 syncPlay();
 pickProfile(4, false);          // 默认 P5 老赵 —— 白皮书里「平均 9.1 种」的化身
-chips.addEventListener('click', e => { const b = e.target.closest('.chip'); if (b) pickProfile(+b.dataset.i, true); });
+chips.addEventListener('click', e => {
+  const b = e.target.closest('.chip');
+  if (!b) return;
+  const same = +b.dataset.i === current;
+  if (touch && same && document.body.dataset.who) { delete document.body.dataset.who; return; }
+  pickProfile(+b.dataset.i, !same);
+});
 frame();
