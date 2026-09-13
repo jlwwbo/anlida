@@ -5,6 +5,8 @@ import { buildMachine, pose, TOTAL } from './machine.js';
 import { PARTS, PHASES, ST_LABEL } from './parts.js';
 
 const $ = s => document.querySelector(s);
+// data-on="" 仍然命中 [data-on]，所以关掉时必须删属性
+const flag = (n, on) => { if (on) n.dataset.on = '1'; else delete n.dataset.on; };
 const canvas = $('#view');
 
 // ── 渲染器 ─────────────────────────────────────────────────────────────────
@@ -224,18 +226,19 @@ function syncPhase() {
   let act = -1;
   PHASES.forEach((p, i) => { if (t >= p.t[0] && t < p.t[1]) act = i; });
   if (act < 0) act = t >= PHASES[5].t[1] ? 5 : 0;
-  railItems.forEach((el, i) => el.dataset.on = i === act ? '1' : '');
+  railItems.forEach((el, i) => flag(el, i === act));
   phaseNote.textContent = PHASES[act].d;
   scrub.value = String(Math.round((t / TOTAL) * 1000));
 }
-function syncPlay() { $('#play').dataset.on = playing ? '1' : ''; $('#play span').textContent = playing ? '暂停' : '播放'; }
+function syncPlay() { flag($('#play'), playing); $('#play span').textContent = playing ? '暂停' : '播放'; }
 $('#play').onclick = () => { playing = !playing; syncPlay(); };
 scrub.oninput = () => { t = (scrub.value / 1000) * TOTAL; playing = false; syncPlay(); };
 const explIn = $('#expl');
 explIn.oninput = () => { $('#explVal').textContent = Math.round(explIn.value / 10) + '%'; };
 $('#shell').onclick = e => {
-  const on = e.currentTarget.dataset.on = e.currentTarget.dataset.on ? '' : '1';
-  rig.shell.visible = !on;
+  const hide = !e.currentTarget.dataset.on;
+  flag(e.currentTarget, hide);
+  rig.shell.visible = !hide;
 };
 
 // ── 入场：零件从爆炸位归拢 ─────────────────────────────────────────────────

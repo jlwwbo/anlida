@@ -3,57 +3,100 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>安粒达 · 破板取药机构</title>
-<meta name="description" content="从铝塑泡罩板取出单粒药的机构结构图：20 槽板仓、无夹爪推送、马蹄支撑座、双侧相机。">
+<title>安粒达｜论粒给药，不拆原包装</title>
+<meta name="description" content="面向多重用药人群的固体制剂自动取药器。药留在原厂铝塑泡罩板里，直到服用前一刻，再由机器把它取出来。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Space+Mono:wght@400;700&display=swap">
-<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./css/tokens.css">
+<link rel="stylesheet" href="./css/landing.css">
 <script type="importmap">
 {"imports":{"three":"./vendor/three/three.module.js","three/addons/":"./vendor/three/jsm/"}}
 </script>
 </head>
 <body>
-<canvas id="view"></canvas>
+<a class="skip" href="#problem">跳至正文</a>
 
-<svg id="leader" aria-hidden="true"><line x1="0" y1="0" x2="0" y2="0"></line></svg>
-<i id="marker" hidden></i>
-<div class="frame" aria-hidden="true"><b></b><b></b><b></b><b></b></div>
-
-<header class="mast">
-  <p class="mono eyebrow">安粒达 ANLIDA<i></i>破板取药机构 · 交互结构图</p>
-  <h1>把药留在<br>原包装里</h1>
-  <p class="lede">现有的自动取药器无一例外要求先把药剥出原包装、散装进药仓。这台机器不剥——它按着原厂铝塑泡罩板，一次挤出一粒。</p>
-  <dl class="figs">
-    <div><dt class="mono">380<s>×</s>250<s>×</s>180</dt><dd>mm<i></i><span>一台面包机的占地</span></dd></div>
-    <div><dt class="mono">20</dt><dd>槽<i></i><span>10 种板装药 × 2 板备份</span></dd></div>
-    <div><dt class="mono">4.1</dt><dd>s/粒<i></i><span>7 板的早间事件约 30 秒</span></dd></div>
-  </dl>
+<header class="top">
+  <a class="wordmark" href="#top">安粒达</a>
+  <nav aria-label="页内导航">
+    <a href="#problem">问题</a>
+    <a href="#force">要多少力</a>
+    <a href="#how">怎么取</a>
+    <a href="#ui">界面</a>
+  </nav>
+  <a class="top__cta" href="./structure.html"><span>看结构图</span><i class="arw"></i></a>
 </header>
 
-<nav class="rail" aria-label="一次取药的时序">
-  <p class="mono rail__h">一次取药 · 六个动作</p>
-  <div id="rail"></div>
-  <p class="note" id="phaseNote"></p>
-</nav>
+<main id="main">
+  <section class="hero" id="top">
+    <canvas id="heroView" aria-hidden="true"></canvas>
+    <p class="hero__pre mono" data-r></p>
+    <h1 class="hero__title"><span class="sr">安粒达</span><span class="hero__glyphs" aria-hidden="true"></span></h1>
+    <div class="hero__foot">
+      <p data-r></p>
+      <a class="cue" href="#problem"><span></span><i aria-hidden="true">↓</i></a>
+    </div>
+  </section>
 
-<div class="sheet" id="sheet">
-  <button class="sheet__grab" id="sheetClose" aria-label="收起"></button>
-  <aside class="card" id="card" data-empty="1" aria-live="polite"></aside>
-  <section class="legend" id="legend" aria-label="零件清单"></section>
-</div>
-<p class="pinned mono" id="pinned" hidden>已钉住 · 点空白处取消</p>
+  <section class="intro" id="problem">
+    <p class="intro__lead mono" data-r></p>
+    <h2 class="intro__title" data-r></h2>
+    <div class="intro__copy" data-r></div>
+  </section>
 
-<div class="dock">
-  <button id="play" class="btn" data-on="1"><em></em><span>暂停</span></button>
-  <label class="sl sl--scrub"><span class="mono">时序</span><input id="scrub" type="range" min="0" max="1000" value="0"></label>
-  <label class="sl"><span class="mono">拆开 <b id="explVal">0%</b></span><input id="expl" type="range" min="0" max="1000" value="0"></label>
-  <button id="shell" class="btn btn--ghost"><span>外壳</span></button>
-  <button id="parts" class="btn btn--only-touch"><span>零件</span></button>
-</div>
+  <section class="pains" aria-label="现有办法为什么都不够"></section>
 
-<p class="stamp mono">ANLD·13 — r2.9<i></i>零件 19<i></i>白模示意，非制造图</p>
+  <section class="manifesto" aria-labelledby="mf-t">
+    <div class="wrap">
+      <h2 id="mf-t" data-r></h2>
+      <p class="manifesto__turn" data-r></p>
+      <p class="manifesto__body" data-r></p>
+    </div>
+  </section>
 
-<script type="module" src="./src/main.js"></script>
+  <section class="force" id="force">
+    <div class="force__head">
+      <p class="eyebrow mono" data-r>破板力学模型</p>
+      <h2 data-r>4 N 到 58 N，跨度 14 倍。<br>这不是分散，是四种失效模式。</h2>
+      <p class="force__note" data-r>点任一条看它的机制。四条画在同一根 0–70 N 的轴上。</p>
+    </div>
+    <div class="force__chart" id="forceChart"></div>
+    <div class="force__detail" id="forceDetail" aria-live="polite"></div>
+  </section>
+
+  <section class="how" id="how">
+    <div class="how__head">
+      <h2 data-r>一次取药，六个动作。</h2>
+      <p data-r>推出托盘的行程本身就是列对位行程；拍照不停车；唯一可能弄坏药的是顶出那一步。</p>
+      <p class="how__figs mono" data-r><b>4.1</b> s/粒<i></i><b>30</b> 秒完成一次 7 板的早间事件<i></i><b>20</b> 槽</p>
+    </div>
+    <ol class="how__steps"></ol>
+    <a class="how__cta" href="./structure.html"><span>在结构图里看这六步</span><i class="arw"></i></a>
+  </section>
+
+  <section class="ui" id="ui">
+    <p class="eyebrow mono" data-r>交互设计</p>
+    <h2 data-r>把「做对」交给机器，<br>把「要不要管」留给人。</h2>
+    <div class="ui__cards"></div>
+  </section>
+
+  <section class="bounds" aria-label="明确不做">
+    <p class="eyebrow mono" data-r>明确不做</p>
+    <ul class="bounds__list"></ul>
+  </section>
+</main>
+
+<footer class="end">
+  <div class="wrap">
+    <h2 data-r></h2>
+    <p class="end__body" data-r></p>
+    <p class="end__foot" data-r></p>
+    <a class="end__cta" href="./structure.html"><span>看结构图</span><i class="arw"></i></a>
+    <p class="stamp mono">安粒达 ANLIDA<i></i>复客松 · 华润三九杯 AI 医疗健康黑客松<i></i>白模示意，非制造图</p>
+  </div>
+</footer>
+
+<script type="module" src="./src/landing.js"></script>
 </body>
 </html>

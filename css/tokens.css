@@ -1,0 +1,50 @@
+/* 设计令牌：两个页面共用 */
+/* 安粒达 · 破板取药机构 —— 白模 + 技术标注
+   纸为底，机器是唯一的白，药是唯一的饱和色。 */
+:root {
+  --paper:#eaecee; --paper-2:#f8f9fa; --sheet:#ffffff;
+  --ink:#13181b; --ink-2:#5c666c; --ink-3:#8d969c;
+  --line:#cdd4d8; --line-2:#dde2e5;
+  --accent:#b8402f; --amber:#c08029;
+  --band:#15191c; --band-ink:#e7eaeb; --band-dim:#8d979d;
+  --sh:0 18px 48px -28px rgba(18,26,31,.38);
+  --serif:"Noto Serif SC","Songti SC",serif;
+  --mono:"Space Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --gut:clamp(16px,2.4vw,38px);
+}
+@media (prefers-color-scheme:dark) {
+  :root:not([data-theme=light]) {
+    --paper:#0b0e10; --paper-2:#14191c; --sheet:#1a2024;
+    --ink:#e8ebec; --ink-2:#98a2a8; --ink-3:#6a747a;
+    --line:#2a3236; --line-2:#1f262a;
+    --accent:#d9573f; --amber:#d69a3c;
+    --band:#191f23; --band-ink:#e8ebec; --band-dim:#8b959b;
+    --sh:0 20px 52px -26px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme=dark] {
+  --paper:#0b0e10; --paper-2:#14191c; --sheet:#1a2024;
+  --ink:#e8ebec; --ink-2:#98a2a8; --ink-3:#6a747a;
+  --line:#2a3236; --line-2:#1f262a;
+  --accent:#d9573f; --amber:#d69a3c;
+  --band:#191f23; --band-ink:#e8ebec; --band-dim:#8b959b;
+  --sh:0 20px 52px -26px rgba(0,0,0,.7);
+}
+
+* { box-sizing:border-box; }
+html,body { height:100%; }
+body {
+  margin:0;
+  color:var(--ink); font-family:var(--sans);
+  background:
+    radial-gradient(118% 86% at 52% 14%, var(--paper-2) 0%, var(--paper) 58%, var(--paper) 100%);
+  background-attachment:fixed;
+}
+.mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+.dot { width:7px; height:7px; border-radius:50%; display:inline-block; flex:none; }
+.dot--ok { background:var(--ink-2); }
+.dot--warn { background:var(--amber); }
+.dot--todo { background:none; box-shadow:inset 0 0 0 1px var(--ink-3); }
+:focus-visible { outline:1px solid var(--accent); outline-offset:2px; }
+@media (prefers-reduced-motion:reduce) { * { transition-duration:.01ms !important; animation-duration:.01ms !important; } }

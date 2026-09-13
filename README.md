@@ -1,6 +1,13 @@
-# 安粒达 · 破板取药机构结构图
+# 安粒达
 
-《复客松 / 11-复客松 / 13-破板取药机构》v2.9 的可交互白模。一页静态站，无构建步骤。
+两页静态站，无构建步骤、无依赖。
+
+| 页 | 是什么 | 取材 |
+|---|---|---|
+| `index.html` | **Landing** —— 问题 → 三章痛点 → 宣言 → 四种失效模式 → 六个动作 → 界面 → 收尾 | 《19-安粒达白皮书》v1.7 |
+| `structure.html` | **交互结构图** —— 19 个零件的白模，可悬停、可拆开、可看时序 | 《13-破板取药机构》v2.9、《17-破板力学模型》v1.0 |
+
+版面仿《常宁居》（`~/Documents/gks`）的 landing 结构：刊头 → 全幅问题章节 → 暗带宣言 → 数据 → 步骤 → 收尾 CTA。
 
 ```bash
 npm run dev                     # = node serve.mjs，零依赖，默认 8732 端口
@@ -35,13 +42,21 @@ open http://localhost:8732
 ## 结构
 
 ```
-index.html        页面骨架与刊头文案
-styles.css        设计令牌（含深色）、刊头、时序轨、零件卡、操作台
-src/parts.js      19 个零件的名称 / 关键数 / 状态 ——《13》的文字在这里，改文案只动这个文件
-src/machine.js    几何装配（单位 mm，直接用《13》3.3 与 4.4 M1 的尺寸）+ 时序函数 pose(t)
-src/main.js       渲染、光照、拾取高亮、爆炸、时序播放、UI 绑定
-vendor/three/     three r180（three.module.js + OrbitControls + RoomEnvironment），已 vendored，离线可跑
+index.html              landing 骨架（文案全部由 JS 注入）
+structure.html          结构图骨架
+css/tokens.css          设计令牌（含深色），两页共用
+css/landing.css         landing 版面
+css/structure.css       结构图版面
+src/landing-content.js  landing 的全部文案与数据 —— 改说法只动这个文件
+src/landing.js          文案注入、滚动进场、失效模式图、hero 的 3D
+src/parts.js            19 个零件 + 六段时序 ——《13》的文字在这里
+src/machine.js          几何装配（单位 mm，直接用《13》3.3 与 4.4 M1 的尺寸）+ pose(t)
+src/main.js             结构图页：渲染、拾取高亮、爆炸、时序播放、抽屉
+serve.mjs               本地预览用的零依赖静态服务
+vendor/three/           three r180，已 vendored，离线可跑
 ```
+
+两页共用 `machine.js`：landing 的 hero 就是同一台机器，慢速摆动 + 循环播放那六个动作，滚出视口即停。
 
 ## 设计口径
 
