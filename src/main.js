@@ -299,3 +299,31 @@ chips.addEventListener('click', e => {
   pickProfile(+b.dataset.i, !same);
 });
 frame();
+
+// 诊断工具：找出世界坐标里「面重合」的网格对 —— z-fighting（转视角时闪）的来源。
+// 控制台跑 __zfight()。改几何之后值得跑一次：同向共面 + 不同材质 = 一定会闪。
+window.__zfight = () => {
+  const boxes = [];
+  for (const [id, p] of reg) for (const m of p.meshes) {
+    const b = new THREE.Box3().setFromObject(m);
+    boxes.push({ id, nm: m.geometry.type, b });
+  }
+  const out = [];
+  const F = b => ({ x: [b.min.x, b.max.x], y: [b.min.y, b.max.y], z: [b.min.z, b.max.z] });
+  for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
+    const A = boxes[i], B = boxes[j];
+    if (!A.b.intersectsBox(B.b)) continue;
+    const a = F(A.b), b2 = F(B.b);
+    for (const ax of ['x', 'y', 'z']) {
+      for (const va of a[ax]) for (const vb of b2[ax]) {
+        if (Math.abs(va - vb) < 0.02) {
+          // 只有当另外两个轴真的重叠一片面积时才算共面
+          const others = ['x', 'y', 'z'].filter(o => o !== ax);
+          const ov = others.map(o => Math.min(a[o][1], b2[o][1]) - Math.max(a[o][0], b2[o][0]));
+          if (ov.every(v => v > 1)) out.push(`${A.id}(${A.nm}) ↔ ${B.id}(${B.nm})  共面于 ${ax}=${va.toFixed(1)}  重叠 ${ov.map(v => v.toFixed(0)).join('×')}mm`);
+        }
+      }
+    }
+  }
+  return [...new Set(out)];
+};

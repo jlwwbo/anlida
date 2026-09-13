@@ -82,6 +82,7 @@ docs/                   技术白皮书与路演 Slides 的 PDF（英文文件�
 esa.jsonc               阿里云 ESA Pages 构建配置
 src/machine.js          几何装配（单位 mm，直接用文档里的尺寸）+ pose(t) + poseLoad(t)
 src/main.js             结构图页：渲染、拾取高亮、爆炸、时序、画像、抽屉
+                        （控制台 __zfight() 查 z-fighting，改几何后跑一次）
 serve.mjs               本地预览用的零依赖静态服务（+ serve.test.mjs）
 vendor/three/           three r180，已 vendored，离线可跑
 ```

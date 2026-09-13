@@ -105,18 +105,22 @@ export function buildMachine(opts = {}) {
 
   // 取药龛：机器前脸右侧凹进去的一格，像饮水机的接水位
   const nicheG = grp('P15', new THREE.Vector3(306, 0, 0), new THREE.Vector3(0, 0, 92));
-  put(nicheG, 'P15', B(112, 100, 6), M.niche, 0, 76, 219);        // 龛后壁（留出滑车的 z=200 行程）
-  put(nicheG, 'P15', B(112, 6, 34), M.niche, 0, 123, 233);        // 龛顶
-  put(nicheG, 'P15', B(6, 96, 34), M.niche, -53, 76, 233);        // 龛侧壁
-  put(nicheG, 'P15', B(6, 96, 34), M.niche, 53, 76, 233);
+  // ⚠️ 龛的内衬必须整体缩进前脸开口里：任何一个面和外壳共面都会 z-fighting，
+  //    转视角时那一片就会闪。下面每个尺寸都刻意错开 0.5–1 mm，不要"对齐"。
+  put(nicheG, 'P15', B(108, 99, 6), M.niche, 0, 76, 217);         // 龛后壁（留出滑车的 z=200 行程）
+  put(nicheG, 'P15', B(106, 6, 30), M.niche, 0, 122, 234);        // 龛顶
+  put(nicheG, 'P15', B(5, 94, 30), M.niche, -51.5, 76, 234);      // 龛侧壁
+  put(nicheG, 'P15', B(5, 94, 30), M.niche, 51.5, 76, 234);
   put(nicheG, 'P15', CY(7, 12, 20), M.trim, 0, 116, 231);         // 出药口
-  put(nicheG, 'P15', B(104, 6, 34), M.trim, 0, 30, 233);          // 接药托（滴水盘）
-  for (let i = -4; i <= 4; i++) put(nicheG, 'P15', B(3, 2.4, 26), M.niche, i * 10, 33.6, 234);      // 托上的格栅
+  put(nicheG, 'P15', B(100, 6, 30), M.trim, 0, 31, 234);          // 接药托（滴水盘）
+  for (let i = -4; i <= 4; i++) put(nicheG, 'P15', B(3, 2.4, 24), M.niche, i * 10, 34.6, 234);      // 托上的格栅
   // 浅碟不是杯：药片最小 φ5 mm，手抖的老人从深杯里捏不出来（白皮书 3.1 / 4.1）
-  const dishMat = new THREE.MeshStandardMaterial({ ...M.cup, side: THREE.DoubleSide });
-  const cup = put(nicheG, 'P15', new THREE.CylinderGeometry(23, 19, 11, 30, 1, true), dishMat, 0, 41.5, 233);
-  put(nicheG, 'P15', CY(19, 2, 26), M.cup, 0, 36.5, 233);                                           // 碟底
-  put(nicheG, 'P15', B(30, 2, 4), M.trim, 0, 37.5, 245);                                            // 前缘低口
+  const dishMat = M.cup.clone();
+  dishMat.side = THREE.DoubleSide;
+  dishMat.depthWrite = false;     // 双面开口薄壁 + 半透明：不关深度写入，自身正反面排序会跳
+  const cup = put(nicheG, 'P15', new THREE.CylinderGeometry(23, 19, 11, 30, 1, true), dishMat, 0, 42.5, 234);
+  put(nicheG, 'P15', CY(19, 2, 24), M.cup, 0, 37.5, 234);                                           // 碟底
+  put(nicheG, 'P15', B(30, 2, 4), M.trim, 0, 38.8, 244);                                            // 前缘低口
   // 集料杯倒到出药口的滑道：贴着龛后壁，滑车够不到的那段由它接手
   put(nicheG, 'P15', B(26, 3, 26), M.trim, 0, 104, 206).rotation.x = -0.3;
   rig.cupProp = cup;
@@ -297,8 +301,8 @@ export function buildMachine(opts = {}) {
     arc.rotation.y = Math.PI / 2;
     arc.geometry.rotateZ(-Math.PI * 0.225);
     put(hsG, 'P12', B(11, 7, 34), M.white, -7, 12, 0);
-    put(hsG, 'P12', B(11, 30, 7), M.white, -7, -2, 13.5);
-    put(hsG, 'P12', B(11, 30, 7), M.white, -7, -2, -13.5);
+    put(hsG, 'P12', B(11, 26, 6), M.white, -7, -2, 13);       // 侧肋比上缘窄，且不高于行距 28.5，免得两行互相插
+    put(hsG, 'P12', B(11, 26, 6), M.white, -7, -2, -13);
 
     rig.rows.push({ ring: ringG, punch: punG });
     if (k === 0) { rig.ring = ringG; rig.punch = punG; }
@@ -318,9 +322,9 @@ export function buildMachine(opts = {}) {
   rig.fly = fly;
 
   const cupG = cg('P14', new THREE.Vector3(-40, 44, 188), new THREE.Vector3(-86, -44, 0));
-  put(cupG, 'P14', B(26, 2.4, 34), M.white, 0, -10, 0);
-  put(cupG, 'P14', B(2, 22, 34), M.white, 12, 1, 0);
-  put(cupG, 'P14', B(2, 22, 34), M.white, -12, 1, 0);
+  put(cupG, 'P14', B(23, 2.4, 27), M.white, 0, -10, 0);     // 杯底比四壁小一圈，端面不齐平
+  put(cupG, 'P14', B(2, 22, 30), M.white, 12, 1, 0);          // 前后壁收到 ±15，让开左右壁的 ±17 端面
+  put(cupG, 'P14', B(2, 22, 30), M.white, -12, 1, 0);
   put(cupG, 'P14', B(26, 22, 2), M.white, 0, 1, 16);
   put(cupG, 'P14', B(26, 22, 2), M.white, 0, 1, -16);
   rig.cup = cupG;
