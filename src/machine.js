@@ -112,9 +112,11 @@ export function buildMachine(opts = {}) {
   put(nicheG, 'P15', CY(7, 12, 20), M.trim, 0, 116, 231);         // 出药口
   put(nicheG, 'P15', B(104, 6, 34), M.trim, 0, 30, 233);          // 接药托（滴水盘）
   for (let i = -4; i <= 4; i++) put(nicheG, 'P15', B(3, 2.4, 26), M.niche, i * 10, 33.6, 234);      // 托上的格栅
-  const cup = put(nicheG, 'P15', new THREE.CylinderGeometry(19, 15, 30, 26, 1, true),
-    new THREE.MeshStandardMaterial({ ...M.cup, side: THREE.DoubleSide }), 0, 49, 233);              // 接药杯
-  put(nicheG, 'P15', CY(15, 2, 24), M.cup, 0, 35, 233);
+  // 浅碟不是杯：药片最小 φ5 mm，手抖的老人从深杯里捏不出来（白皮书 3.1 / 4.1）
+  const dishMat = new THREE.MeshStandardMaterial({ ...M.cup, side: THREE.DoubleSide });
+  const cup = put(nicheG, 'P15', new THREE.CylinderGeometry(23, 19, 11, 30, 1, true), dishMat, 0, 41.5, 233);
+  put(nicheG, 'P15', CY(19, 2, 26), M.cup, 0, 36.5, 233);                                           // 碟底
+  put(nicheG, 'P15', B(30, 2, 4), M.trim, 0, 37.5, 245);                                            // 前缘低口
   // 集料杯倒到出药口的滑道：贴着龛后壁，滑车够不到的那段由它接手
   put(nicheG, 'P15', B(26, 3, 26), M.trim, 0, 104, 206).rotation.x = -0.3;
   rig.cupProp = cup;
