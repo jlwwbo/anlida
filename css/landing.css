@@ -30,6 +30,11 @@ a:hover > .arw { transform:rotate(45deg) translate(2px,-2px); }
 .top nav { display:flex; gap:clamp(12px,2vw,26px); margin-left:auto; }
 .top nav a { font-size:12px; color:var(--ink-2); text-decoration:none; transition:color .2s ease; }
 .top nav a:hover { color:var(--accent); }
+.top__docs { display:flex; align-items:center; gap:clamp(10px,1.6vw,20px); margin-left:auto;
+  padding-left:clamp(12px,2vw,26px); border-left:1px solid var(--line-2); }
+.top nav + .top__docs { margin-left:clamp(12px,2vw,26px); }
+.top__docs a { font-size:12px; color:var(--ink-2); text-decoration:none; white-space:nowrap; transition:color .2s ease; }
+.top__docs a:hover { color:var(--accent); }
 .top__cta { display:inline-flex; align-items:center; gap:8px; padding:7px 13px; border:1px solid var(--line);
   font-size:12px; text-decoration:none; color:var(--ink-2); transition:.22s ease; }
 .top__cta:hover { color:var(--ink); border-color:var(--ink-3); }
@@ -205,6 +210,9 @@ a:hover > .arw { transform:rotate(45deg) translate(2px,-2px); }
 @media (max-width:860px) {
   .papers li:nth-child(n+2) a { border-top:1px solid color-mix(in srgb,var(--band-ink) 10%,transparent); }
   .top nav { display:none; }
+  .top { gap:12px; }
+  .top__docs { gap:12px; padding-left:12px; }
+  .top__docs a { font-size:12px; }
   .top__cta { margin-left:auto; }
   .hero { height:auto; min-height:0; padding-bottom:clamp(30px,6vh,56px); }
   /* 画布在 DOM 里排第一，手机上它变成常规流，要用 order 把它压到标题下面 */

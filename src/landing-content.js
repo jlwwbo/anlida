@@ -94,9 +94,9 @@ export const boundaries = [
 
 // 两份 PDF。文件名用英文 —— 中文路径在 CDN 与下载器上都容易出问题
 export const papers = [
-  { nm: '技术白皮书', file: '/docs/anlida-whitepaper.pdf', meta: '89 页 · 5.1 MB · v2.5.1',
+  { nm: '技术白皮书', file: '/docs/anlida-whitepaper.pdf', meta: '89 页 · 5.1 MB · 可在线查看或下载',
     d: '问题、四种失效模式、整机与外部设计、交互、创新点，附十个附录（板型分类、力学模型、九个画像、市场与政策、来源）。' },
-  { nm: '路演 Slides', file: '/docs/anlida-slides.pdf', meta: '13 页 · 1.3 MB',
+  { nm: '路演 Slides', file: '/docs/anlida-slides.pdf', meta: '13 页 · 1.3 MB · 可在线查看或下载',
     d: '复客松现场用的那一版。' },
 ];
 
