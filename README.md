@@ -3,9 +3,14 @@
 《复客松 / 11-复客松 / 13-破板取药机构》v2.9 的可交互白模。一页静态站，无构建步骤。
 
 ```bash
-python3 -m http.server 8000     # 必须走 HTTP：ES module + importmap 在 file:// 下被 CORS 拦
-open http://localhost:8000
+npm run dev                     # = node serve.mjs，零依赖，默认 8732 端口
+open http://localhost:8732
 ```
+
+**没有后端。** 整站是 `index.html` + 三个 ES module + vendored 的 three，
+扔进任何静态托管（Vercel / GitHub Pages / 一个 nginx 目录）就能跑。
+`serve.mjs` 只是本地预览用的——ES module + importmap 在 `file://` 下会被 CORS 拦，
+必须走 HTTP。`npm test` 跑它的路径越界自检。
 
 ## 怎么看
 

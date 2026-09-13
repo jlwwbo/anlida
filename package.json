@@ -1,0 +1,10 @@
+{
+  "name": "anlida",
+  "private": true,
+  "type": "module",
+  "description": "安粒达 · 破板取药机构交互结构图。纯静态，无构建步骤，无依赖。",
+  "scripts": {
+    "dev": "node serve.mjs",
+    "test": "node serve.test.mjs"
+  }
+}
