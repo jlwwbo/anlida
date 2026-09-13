@@ -14,7 +14,6 @@ const el = (t, cls, html) => { const n = document.createElement(t); if (cls) n.c
 $('.hero__pre').textContent = hero.prelude;
 $('.hero__glyphs').innerHTML = hero.glyphs.map(g => `<span>${g}</span>`).join('');
 $('.hero__foot p').innerHTML = hero.lines.join('<br>');
-$('.cue span').textContent = hero.cue;
 
 $('.intro__lead').textContent = problem.lead;
 $('.intro__title').innerHTML = problem.title.map(l => `<span>${l}</span>`).join('');

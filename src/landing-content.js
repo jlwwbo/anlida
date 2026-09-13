@@ -5,7 +5,6 @@ export const hero = {
   prelude: '面向多重用药人群的固体制剂自动取药器',
   glyphs: ['安', '粒', '达'],
   lines: ['论粒给药，不拆原包装。', '药留在原厂铝塑板里，直到服用前一刻。'],
-  cue: '先看这条长尾',
 };
 
 export const problem = {

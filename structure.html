@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>安粒达 · 结构图</title>
-<meta name="description" content="从铝塑泡罩板取出单粒药的机构结构图：20 槽板仓、无夹爪推送、马蹄支撑座、双侧相机。">
+<meta name="description" content="19 个零件的可交互白模：选一个用药画像装进去，看它占几个槽、能用多久，再看一次取药的六个动作。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Space+Mono:wght@400;700&display=swap">
@@ -16,46 +16,45 @@
 </head>
 <body>
 <canvas id="view"></canvas>
-
-<svg id="leader" aria-hidden="true"><line x1="0" y1="0" x2="0" y2="0"></line></svg>
-<i id="marker" hidden></i>
 <div class="frame" aria-hidden="true"><b></b><b></b><b></b><b></b></div>
 
-<a class="backlink mono" href="./">← 安粒达</a>
-
-<header class="mast">
-  <p class="mono eyebrow">安粒达 ANLIDA<i></i>破板取药机构 · 交互结构图</p>
-  <h1>把药留在<br>原包装里</h1>
-  <p class="lede">现有的自动取药器无一例外要求先把药剥出原包装、散装进药仓。这台机器不剥——它按着原厂铝塑泡罩板，一次挤出一粒。</p>
-  <dl class="figs">
-    <div><dt class="mono">380<s>×</s>250<s>×</s>180</dt><dd>mm<i></i><span>一台面包机的占地</span></dd></div>
-    <div><dt class="mono">20</dt><dd>槽<i></i><span>10 种板装药 × 2 板备份</span></dd></div>
-    <div><dt class="mono">4.1</dt><dd>s/粒<i></i><span>7 板的早间事件约 30 秒</span></dd></div>
-  </dl>
+<header class="brand">
+  <a class="brand__back mono" href="./">← 安粒达</a>
+  <p class="brand__t mono">破板取药机构 · 交互结构图</p>
 </header>
 
-<nav class="rail" aria-label="一次取药的时序">
-  <p class="mono rail__h">一次取药 · 六个动作</p>
-  <div id="rail"></div>
-  <p class="note" id="phaseNote"></p>
-</nav>
+<section class="who" aria-label="用药画像">
+  <p class="lbl mono">装谁的药</p>
+  <div class="who__chips" id="chips"></div>
+  <div class="who__card" id="whoCard"></div>
+</section>
 
-<div class="sheet" id="sheet">
-  <button class="sheet__grab" id="sheetClose" aria-label="收起"></button>
-  <aside class="card" id="card" data-empty="1" aria-live="polite"></aside>
-  <section class="legend" id="legend" aria-label="零件清单"></section>
-</div>
-<p class="pinned mono" id="pinned" hidden>已钉住 · 点空白处取消</p>
+<aside class="side">
+  <div class="card" id="card" aria-live="polite"></div>
+  <nav class="rail" aria-label="一次取药的时序">
+    <p class="lbl mono">一次取药 · 六个动作</p>
+    <div id="rail"></div>
+    <p class="note" id="phaseNote"></p>
+  </nav>
+</aside>
+
+<section class="sheet" id="sheet" hidden>
+  <button class="sheet__x mono" id="sheetClose" aria-label="收起">关闭</button>
+  <p class="lbl mono">19 个零件</p>
+  <div id="legend"></div>
+</section>
 
 <div class="dock">
-  <button id="play" class="btn" data-on="1"><em></em><span>暂停</span></button>
+  <button id="play" class="btn"><em></em><span>暂停</span></button>
   <label class="sl sl--scrub"><span class="mono">时序</span><input id="scrub" type="range" min="0" max="1000" value="0"></label>
-  <label class="sl"><span class="mono">拆开 <b id="explVal">0%</b></span><input id="expl" type="range" min="0" max="1000" value="0"></label>
+  <div class="seg" role="group" aria-label="拆开程度">
+    <span class="mono lbl lbl--in">拆开</span>
+    <button data-x="0" data-on="1">0</button><button data-x="0.5">50</button><button data-x="1">100</button>
+  </div>
+  <button id="load" class="btn"><span>装填演示</span></button>
   <button id="shell" class="btn btn--ghost"><span>外壳</span></button>
-  <button id="parts" class="btn btn--only-touch"><span>零件</span></button>
+  <button id="parts" class="btn"><span>零件</span></button>
 </div>
-
-<p class="stamp mono">ANLD·13 — r2.9<i></i>零件 19<i></i>白模示意，非制造图</p>
 
 <script type="module" src="./src/main.js"></script>
 </body>

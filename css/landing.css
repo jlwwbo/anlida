@@ -53,11 +53,6 @@ a:hover > .arw { transform:rotate(45deg) translate(2px,-2px); }
 .hero__foot { position:relative; margin-top:auto; display:flex; align-items:flex-end;
   justify-content:space-between; gap:24px; flex-wrap:wrap; }
 .hero__foot p { margin:0; max-width:34ch; font-size:14px; line-height:1.85; color:var(--ink-2); }
-.cue { display:inline-flex; align-items:center; gap:9px; font-size:11px; letter-spacing:.1em;
-  color:var(--ink-3); text-decoration:none; }
-.cue i { font-style:normal; animation:bob 2.4s ease-in-out infinite; }
-@keyframes bob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(4px); } }
-.cue:hover { color:var(--accent); }
 
 /* ── 问题 ─────────────────────────────────────────────── */
 .intro { max-width:1180px; margin:0 auto; padding:clamp(64px,8.5vh,112px) var(--gut); }
